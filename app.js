@@ -60,11 +60,6 @@
     lightboxThumbStrip: document.getElementById('lightbox-thumb-strip'),
     slideshowProgressBar: document.getElementById('slideshow-progress-bar'),
 
-    // Google Sites Modal
-    googleSitesBtn: document.getElementById('google-sites-btn'),
-    googleSitesModal: document.getElementById('google-sites-modal'),
-    googleSitesModalClose: document.getElementById('google-sites-modal-close'),
-    copyEmbedBtn: document.getElementById('copy-embed-btn'),
     toast: document.getElementById('toast'),
     toastMsg: document.getElementById('toast-msg')
   };
@@ -102,7 +97,6 @@
     setupLightboxEvents();
     setupRouter();
     setupAudioToggle();
-    setupGoogleSitesModal();
   }
 
   function setupCursorSpotlight() {
@@ -766,8 +760,123 @@
   }
 
   /* ==========================================================================
-     Ambient Night Atmosphere Sound (Native Web Audio API)
+     Soft Piano Rhythm Synthesizer (Acoustic Nocturne Engine)
      ========================================================================== */
+  const pianoScore = [
+    // Measure 1: Fm9 (F minor 9 - Emotional nocturne opening)
+    { time: 0.00, freq: 87.31, dur: 3.6, vel: 0.65, pan: -0.35 },  // F2
+    { time: 0.00, freq: 130.81, dur: 3.2, vel: 0.48, pan: -0.2 },  // C3
+    { time: 0.48, freq: 207.65, dur: 2.8, vel: 0.40, pan: -0.1 },  // Ab3
+    { time: 0.96, freq: 311.13, dur: 2.6, vel: 0.52, pan: 0.1 },   // Eb4
+    { time: 1.44, freq: 392.00, dur: 2.5, vel: 0.58, pan: 0.25 },  // G4
+    { time: 1.92, freq: 311.13, dur: 2.2, vel: 0.38, pan: 0.1 },   // Eb4
+    { time: 2.40, freq: 207.65, dur: 2.2, vel: 0.36, pan: -0.1 },  // Ab3
+    { time: 2.88, freq: 261.63, dur: 2.2, vel: 0.44, pan: 0.0 },   // C4
+    { time: 3.36, freq: 311.13, dur: 2.0, vel: 0.46, pan: 0.1 },   // Eb4
+
+    // Measure 2: Dbmaj9 (Warm nocturnal resolution)
+    { time: 3.84, freq: 69.30, dur: 3.8, vel: 0.70, pan: -0.4 },   // Db2
+    { time: 3.84, freq: 103.83, dur: 3.4, vel: 0.48, pan: -0.25 }, // Ab2
+    { time: 4.32, freq: 174.61, dur: 2.8, vel: 0.42, pan: -0.15 }, // F3
+    { time: 4.80, freq: 261.63, dur: 2.6, vel: 0.50, pan: 0.05 },  // C4
+    { time: 5.28, freq: 311.13, dur: 2.5, vel: 0.56, pan: 0.15 },  // Eb4
+    { time: 5.76, freq: 349.23, dur: 2.6, vel: 0.62, pan: 0.3 },   // F4
+    { time: 6.24, freq: 261.63, dur: 2.2, vel: 0.40, pan: 0.05 },  // C4
+    { time: 6.72, freq: 207.65, dur: 2.2, vel: 0.36, pan: -0.1 },  // Ab3
+    { time: 7.20, freq: 261.63, dur: 2.0, vel: 0.44, pan: 0.05 },  // C4
+
+    // Measure 3: Abadd9 (Lyrical clarity)
+    { time: 7.68, freq: 103.83, dur: 3.8, vel: 0.68, pan: -0.3 },  // Ab2
+    { time: 7.68, freq: 155.56, dur: 3.3, vel: 0.48, pan: -0.2 },  // Eb3
+    { time: 8.16, freq: 261.63, dur: 2.8, vel: 0.44, pan: 0.0 },   // C4
+    { time: 8.64, freq: 466.16, dur: 2.6, vel: 0.60, pan: 0.35 },  // Bb4
+    { time: 9.12, freq: 415.30, dur: 2.5, vel: 0.52, pan: 0.25 },  // Ab4
+    { time: 9.60, freq: 311.13, dur: 2.2, vel: 0.40, pan: 0.1 },   // Eb4
+    { time: 10.08, freq: 261.63, dur: 2.2, vel: 0.38, pan: 0.0 },  // C4
+    { time: 10.56, freq: 233.08, dur: 2.2, vel: 0.44, pan: -0.05 }, // Bb3
+    { time: 11.04, freq: 311.13, dur: 2.0, vel: 0.46, pan: 0.1 },  // Eb4
+
+    // Measure 4: Ebsus4 -> Eb (Gentle turnaround)
+    { time: 11.52, freq: 77.78, dur: 3.8, vel: 0.68, pan: -0.38 }, // Eb2
+    { time: 11.52, freq: 116.54, dur: 3.3, vel: 0.46, pan: -0.25 }, // Bb2
+    { time: 12.00, freq: 196.00, dur: 2.8, vel: 0.42, pan: -0.1 },  // G3
+    { time: 12.48, freq: 277.18, dur: 2.6, vel: 0.52, pan: 0.1 },   // Db4
+    { time: 12.96, freq: 349.23, dur: 2.6, vel: 0.60, pan: 0.28 },  // F4
+    { time: 13.44, freq: 311.13, dur: 2.4, vel: 0.56, pan: 0.15 },  // Eb4
+    { time: 13.92, freq: 233.08, dur: 2.2, vel: 0.40, pan: -0.05 }, // Bb3
+    { time: 14.40, freq: 196.00, dur: 2.2, vel: 0.38, pan: -0.1 },  // G3
+    { time: 14.88, freq: 233.08, dur: 2.0, vel: 0.44, pan: -0.05 }  // Bb3
+  ];
+  const pianoLoopLength = 15.36; // seconds per cycle
+
+  let pianoSchedulerTimer = null;
+  let pianoLoopStartTime = 0;
+  let pianoMasterGain = null;
+
+  function playPianoKey(ctx, destination, freq, time, duration = 2.4, velocity = 0.5, pan = 0) {
+    if (!ctx || ctx.state === 'closed') return;
+
+    // Gain envelope (instant hammer strike + exponential acoustic decay)
+    const noteGain = ctx.createGain();
+    noteGain.gain.setValueAtTime(0.0001, time);
+    noteGain.gain.exponentialRampToValueAtTime(velocity * 0.14, time + 0.005);
+    noteGain.gain.exponentialRampToValueAtTime(velocity * 0.035, time + 0.55);
+    noteGain.gain.exponentialRampToValueAtTime(0.00001, time + duration);
+
+    // Dynamic lowpass filter (piano string string-damping frequency drop)
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    const cutoff = Math.min(freq * 5.2, 3800);
+    filter.frequency.setValueAtTime(cutoff, time);
+    filter.frequency.exponentialRampToValueAtTime(Math.max(freq * 1.3, 260), time + duration * 0.85);
+
+    // Stereo Panner (gentle acoustic piano spread across keyboard)
+    if (ctx.createStereoPanner) {
+      const panner = ctx.createStereoPanner();
+      panner.pan.setValueAtTime(pan, time);
+      noteGain.connect(filter);
+      filter.connect(panner);
+      panner.connect(destination);
+    } else {
+      noteGain.connect(filter);
+      filter.connect(destination);
+    }
+
+    // Three layered oscillators with subtle organic detuning
+    // 1. Fundamental
+    const osc1 = ctx.createOscillator();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(freq, time);
+
+    // 2. Warm 2nd harmonic (octave overtone)
+    const osc2 = ctx.createOscillator();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(freq * 2 + 0.25, time);
+    const osc2Gain = ctx.createGain();
+    osc2Gain.gain.setValueAtTime(0.32, time);
+    osc2.connect(osc2Gain);
+    osc2Gain.connect(noteGain);
+
+    // 3. Delicate 3rd harmonic (octave + 5th)
+    const osc3 = ctx.createOscillator();
+    osc3.type = 'sine';
+    osc3.frequency.setValueAtTime(freq * 3 - 0.35, time);
+    const osc3Gain = ctx.createGain();
+    osc3Gain.gain.setValueAtTime(0.10, time);
+    osc3.connect(osc3Gain);
+    osc3Gain.connect(noteGain);
+
+    osc1.connect(noteGain);
+
+    osc1.start(time);
+    osc2.start(time);
+    osc3.start(time);
+
+    osc1.stop(time + duration + 0.1);
+    osc2.stop(time + duration + 0.1);
+    osc3.stop(time + duration + 0.1);
+  }
+
   function setupAudioToggle() {
     if (!elements.audioToggleBtn) return;
 
@@ -779,11 +888,11 @@
       if (state.ambientAudioPlaying) {
         stopWebAudio();
         elements.audioToggleBtn.classList.remove('active');
-        showToast('Night atmosphere muted');
+        showToast('Piano muted');
       } else {
         startWebAudio();
         elements.audioToggleBtn.classList.add('active');
-        showToast('Night atmosphere enabled ☾');
+        showToast('Playing soft piano rhythm ♫');
       }
     });
   }
@@ -800,53 +909,78 @@
     }
 
     const ctx = state.audioCtx;
-    const masterGain = ctx.createGain();
-    masterGain.gain.setValueAtTime(0.001, ctx.currentTime);
-    masterGain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 3);
-    masterGain.connect(ctx.destination);
 
-    // Warm deep drone chord (C minor 9th: C2, G2, Eb3, Bb3, D4)
-    const freqs = [65.41, 98.00, 155.56, 233.08, 293.66];
-    const oscillators = [];
+    // Master Gain
+    pianoMasterGain = ctx.createGain();
+    pianoMasterGain.gain.setValueAtTime(0.001, ctx.currentTime);
+    pianoMasterGain.gain.exponentialRampToValueAtTime(0.40, ctx.currentTime + 1.5);
 
-    freqs.forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
+    // Warm stereo delay/reverb unit
+    const delayL = ctx.createDelay();
+    const delayR = ctx.createDelay();
+    delayL.delayTime.value = 0.28;
+    delayR.delayTime.value = 0.42;
 
-      osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    const delayFeedback = ctx.createGain();
+    delayFeedback.gain.value = 0.25;
 
-      // Lowpass filter for smooth warm nocturnal feel
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(450 + idx * 80, ctx.currentTime);
+    const delayFilter = ctx.createBiquadFilter();
+    delayFilter.type = 'lowpass';
+    delayFilter.frequency.value = 1600;
 
-      gain.gain.setValueAtTime(0.05 / (idx + 1), ctx.currentTime);
+    pianoMasterGain.connect(delayL);
+    pianoMasterGain.connect(delayR);
 
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterGain);
+    delayL.connect(delayFilter);
+    delayR.connect(delayFilter);
+    delayFilter.connect(delayFeedback);
+    delayFeedback.connect(delayL);
 
-      osc.start();
-      oscillators.push(osc);
-    });
+    delayFilter.connect(ctx.destination);
+    pianoMasterGain.connect(ctx.destination);
 
-    state.audioNodes = { masterGain, oscillators };
+    // Lookahead scheduling loop
+    pianoLoopStartTime = ctx.currentTime + 0.1;
+    let scheduledUpToTime = pianoLoopStartTime;
+
+    function scheduleAhead() {
+      if (!state.ambientAudioPlaying) return;
+      const currentTime = ctx.currentTime;
+      const lookahead = 2.0; // schedule 2 seconds ahead
+
+      while (scheduledUpToTime < currentTime + lookahead) {
+        const cycleOffset = (scheduledUpToTime - pianoLoopStartTime) % pianoLoopLength;
+        const currentCycleStart = scheduledUpToTime - cycleOffset;
+
+        // Schedule notes in the score that fall into this window
+        pianoScore.forEach(note => {
+          const noteAbsoluteTime = currentCycleStart + note.time;
+          if (noteAbsoluteTime >= scheduledUpToTime && noteAbsoluteTime < scheduledUpToTime + 1.0) {
+            playPianoKey(ctx, pianoMasterGain, note.freq, noteAbsoluteTime, note.dur, note.vel, note.pan);
+          }
+        });
+
+        scheduledUpToTime += 1.0;
+      }
+    }
+
     state.ambientAudioPlaying = true;
+    scheduleAhead();
+    pianoSchedulerTimer = setInterval(scheduleAhead, 450);
   }
 
   function stopWebAudio() {
-    if (state.audioNodes && state.audioNodes.masterGain) {
-      const ctx = state.audioCtx;
-      state.audioNodes.masterGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1);
-      setTimeout(() => {
-        state.audioNodes.oscillators.forEach(osc => {
-          try { osc.stop(); } catch (e) {}
-        });
-        state.audioNodes = null;
-      }, 1000);
-    }
     state.ambientAudioPlaying = false;
+    clearInterval(pianoSchedulerTimer);
+    pianoSchedulerTimer = null;
+
+    if (pianoMasterGain && state.audioCtx) {
+      const ctx = state.audioCtx;
+      pianoMasterGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.0);
+      setTimeout(() => {
+        pianoMasterGain = null;
+      }, 1100);
+    }
   }
 
   /* ==========================================================================
@@ -875,38 +1009,6 @@
         elements.siteHeader.classList.remove('scrolled');
       }
     }, { passive: true });
-  }
-
-  /* ==========================================================================
-     Google Sites Modal & Helper
-     ========================================================================== */
-  function setupGoogleSitesModal() {
-    if (!elements.googleSitesBtn || !elements.googleSitesModal) return;
-
-    elements.googleSitesBtn.addEventListener('click', () => {
-      elements.googleSitesModal.classList.add('active');
-    });
-
-    if (elements.googleSitesModalClose) {
-      elements.googleSitesModalClose.addEventListener('click', () => {
-        elements.googleSitesModal.classList.remove('active');
-      });
-    }
-
-    elements.googleSitesModal.addEventListener('click', (e) => {
-      if (e.target === elements.googleSitesModal) {
-        elements.googleSitesModal.classList.remove('active');
-      }
-    });
-
-    if (elements.copyEmbedBtn) {
-      elements.copyEmbedBtn.addEventListener('click', () => {
-        const embedCode = `<iframe src="YOUR_DEPLOYED_URL_HERE" width="100%" height="900" frameborder="0" style="border:none; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.5);" allowfullscreen></iframe>`;
-        navigator.clipboard.writeText(embedCode).then(() => {
-          showToast('Google Sites embed snippet copied!');
-        });
-      });
-    }
   }
 
   /* Toast Notification */

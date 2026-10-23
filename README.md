@@ -1,6 +1,6 @@
 # Guys Guys — Night Shoot 2026
 
-An editorial wedding-style photo gallery and nocturnal visual archive celebrating brotherhood, charisma, and cinematic darkness.
+An editorial nocturnal photo gallery and visual archive celebrating brotherhood, charisma, and cinematic darkness.
 
 > *"Dressed in grace, bound by years. A nocturnal visual archive capturing thirteen souls, enduring laughter and a night etched in timeless frames."*  
 > — **Captured by Mahir Faiyaz**
@@ -9,7 +9,7 @@ An editorial wedding-style photo gallery and nocturnal visual archive celebratin
 
 ## Features
 
-- **Iconic Editorial Badges**: High-fashion wedding magazine cards featuring centered white serif typography badges.
+- **Iconic Editorial Badges**: High-fashion editorial cards featuring centered white serif typography badges.
 - **Soft & Slow Transitions**:
   - Ethereal blooming photo opening (0.85s focal reveal).
   - Directional sliding crossfade for previous and next photo navigation (0.75s).
@@ -20,7 +20,7 @@ An editorial wedding-style photo gallery and nocturnal visual archive celebratin
   - Automated 5-second slideshow with a golden progress bar.
 - **1-Click High-Res ZIP Download**: Download any friend's complete portrait series in a single `.zip` archive.
 - **Atmospheric Canvas**: Dynamic nocturnal bokeh lights and drifting starlight.
-- **Night Ambiance Soundscape**: Optional soothing harmonic night tone synthesized natively with Web Audio API.
+- **Soft Piano Rhythm**: Soothing, soft acoustic piano melodies synthesized natively in real-time with Web Audio API.
 
 ---
 
